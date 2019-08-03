@@ -3,4 +3,9 @@
     <dimen name="txt_margin_start">16dp</dimen>
     <dimen name="txt_margin_end">16dp</dimen>
     <dimen name="txt_margin_large">8dp</dimen>
+    <dimen name="margin_left">8dp</dimen>
+    <dimen name="margin_top">8dp</dimen>
+    <dimen name="margin_start">8dp</dimen>
+    <dimen name="title_lager">20sp</dimen>
+    <dimen name="text_price">18sp</dimen>
 </resources>
