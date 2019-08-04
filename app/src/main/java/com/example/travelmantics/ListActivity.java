@@ -44,6 +44,12 @@ public class ListActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.list_activity_menu, menu);
+        MenuItem insertMenu = menu.findItem(R.id.insert_menu);
+        if (FirebaseUtils.isAdmin == true){
+            insertMenu.setVisible(false);
+        } else {
+            insertMenu.setVisible(false);
+        }
         return true;
     }
 
@@ -85,5 +91,9 @@ public class ListActivity extends AppCompatActivity {
         LinearLayoutManager dealsLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         rvDeals.setLayoutManager(dealsLayoutManager);
         FirebaseUtils.attachListener();
+    }
+
+    public void showMenu(){
+        invalidateOptionsMenu();
     }
 }
