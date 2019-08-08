@@ -1,11 +1,14 @@
 package com.example.travelmantics;
 
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -32,7 +35,7 @@ public class FirebaseUtils {
     public static StorageReference mStorageRef;
     public static FirebaseAuth.AuthStateListener mAuthListener;
     public static ArrayList<TravelDeal> mDeals;
-    private static final int RC_SIGN_IN = 123;
+    private static final int RC_SIGN_IN = 234;
     private static ListActivity caller;
     public FirebaseUtils(){}
     public static boolean isAdmin;
@@ -43,6 +46,7 @@ public class FirebaseUtils {
             mFirebaseDataBase = FirebaseDatabase.getInstance();
             mFirebaseAuth = FirebaseAuth.getInstance();
             caller = callerActivity;
+
             mAuthListener = new FirebaseAuth.AuthStateListener() {
                 @Override
                 public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -60,6 +64,16 @@ public class FirebaseUtils {
         }
         mDeals = new ArrayList<TravelDeal>();
         mDataBaseReference = mFirebaseDataBase.getReference().child(ref);
+    }
+
+
+    // Configuring offline persistence
+    public static FirebaseDatabase getDatabase() {
+        if (mFirebaseDataBase == null) {
+            mFirebaseDataBase = FirebaseDatabase.getInstance();
+            mFirebaseDataBase.setPersistenceEnabled(true);
+        }
+        return mFirebaseDataBase;
     }
 
     public static void attachListener (){
@@ -80,21 +94,36 @@ public class FirebaseUtils {
                 AuthUI.getInstance()
                         .createSignInIntentBuilder()
                         .setAvailableProviders(providers)
+                        //.setIsSmartLockEnabled(false)
                         .build(),
                 RC_SIGN_IN);
     }
+    public static void signOut() {
+        AuthUI.getInstance()
+                .signOut(caller)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Log.d("Logout", "User Logged Out");
+                        Toast.makeText(caller, "Signed Out Successfully", Toast.LENGTH_SHORT).show();
+                        FirebaseUtils.attachListener();
+                    }
+                });
+    }
 
-    private static void checkAdmin(String uid){
+    static void checkAdmin(String uid){
         FirebaseUtils.isAdmin = false;
-        DatabaseReference ref = mFirebaseDataBase.getReference().child("administrators")
+        DatabaseReference ref = mFirebaseDataBase.getReference()
+                .child("administrators")
                 .child(uid);
 
         ChildEventListener listener = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 FirebaseUtils.isAdmin = true;
-                //Log.d("Admin", "You are an administrator");
+                Log.d("Admin", "You are an administrator");
                 caller.showMenu();
+
             }
 
             @Override
@@ -121,6 +150,8 @@ public class FirebaseUtils {
     }
     public static void connectStorage(){
         mStorage = FirebaseStorage.getInstance();
-        mStorageRef = mStorage.getReference().child("deals pictures");
+        mStorageRef = mStorage.getReference().child("deals_pictures");
     }
+
+
 }

@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -38,7 +39,7 @@ public class ListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
-
+        FirebaseUtils.getDatabase();
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -46,7 +47,7 @@ public class ListActivity extends AppCompatActivity {
         inflater.inflate(R.menu.list_activity_menu, menu);
         MenuItem insertMenu = menu.findItem(R.id.insert_menu);
         if (FirebaseUtils.isAdmin == true){
-            insertMenu.setVisible(false);
+            insertMenu.setVisible(true);
         } else {
             insertMenu.setVisible(false);
         }
@@ -61,14 +62,15 @@ public class ListActivity extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             case R.id.logout_menu:
-                AuthUI.getInstance()
-                        .signOut(this)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                //AuthUI.getInstance()
+                        //FirebaseUtils.signOut(this)
+                FirebaseUtils.signOut();
+                       /* .addOnCompleteListener(new OnCompleteListener<Void>() {
                             public void onComplete(@NonNull Task<Void> task) {
                                Log.d("Logout", "User Logged Out");
                                FirebaseUtils.attachListener();
                             }
-                        });
+                        });*/
                 FirebaseUtils.detachListener();
                 return true;
         }
@@ -79,8 +81,9 @@ public class ListActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         FirebaseUtils.detachListener();
+        showMenu();
     }
-
+    @SuppressLint("WrongConstant")
     @Override
     protected void onResume() {
         super.onResume();
@@ -88,9 +91,16 @@ public class ListActivity extends AppCompatActivity {
         RecyclerView rvDeals = (RecyclerView) findViewById(R.id.rvDeals);
         final DealAdapter adapter = new DealAdapter();
         rvDeals.setAdapter(adapter);
+        rvDeals.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+/*
         LinearLayoutManager dealsLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        rvDeals.setLayoutManager(dealsLayoutManager);
+*/
+       /* rvDeals.setLayoutManager(dealsLayoutManager);*/
         FirebaseUtils.attachListener();
+        if (FirebaseUtils.mFirebaseAuth.getUid() != null) {
+            FirebaseUtils.checkAdmin(FirebaseUtils.mFirebaseAuth.getUid());
+            showMenu();
+        }
     }
 
     public void showMenu(){
